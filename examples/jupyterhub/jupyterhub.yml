@@ -1,0 +1,37 @@
+# Copyright (c) Jupyter Development Team.
+# Distributed under the terms of the Modified BSD License.
+
+version: "2"
+
+services:
+  hub:
+    build: .
+    image: jtyberg/jupyterhub
+    container_name: jupyterhub
+    networks:
+      - default
+    volumes:
+      - "secrets:/etc/letsencrypt"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "/usr/local/bin/docker:/usr/local/bin/docker"
+    ports:
+      - "443:443"
+    environment:
+      DOCKER_CONTAINER_IMAGE: ${DOCKER_CONTAINER_IMAGE}
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET}
+      OAUTH_CALLBACK_URL: ${OAUTH_CALLBACK_URL}
+    command: >
+      jupyterhub -f /srv/jupyterhub/jupyterhub_config.py
+
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: 172.22.0.0/16
+          gateway: 172.22.0.1
+
+volumes:
+  secrets:
+    external:
+      name: ${SECRETS_VOLUME}
